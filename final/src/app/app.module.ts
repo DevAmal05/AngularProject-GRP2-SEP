@@ -11,12 +11,16 @@ import { environment } from 'src/environments/environment';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { UsersComponent } from './users/users.component';
+import { ResetpasswordComponent } from './resetpassword/resetpassword.component';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-    UsersComponent
+    UsersComponent,
+    ResetpasswordComponent,
+    RegisterComponent
   ],
   imports: [
     BrowserModule,
