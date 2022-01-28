@@ -1,37 +1,75 @@
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <button class="btn btn-primary my-3" [routerLink]="['/people-list']">Back</button>
-        <h6 class="m-0 font-weight-bold text-primary">Add user</h6>
-    </div>
-    <div class="card-body">
-       <form [formGroup]="addUserForm" (ngSubmit)="onSubmit()" >
-           <div class="form-group mb-3">
-            <label for="Cin">Cin :</label>
-            <input type="text" name="Cin" id="Cin" formControlName="CIn"  class="form-control" [(ngModel)]="Cin">
-           </div>
-           <div class="form-group mb-3">
-            <label for="firstname">Firstname :</label>
-            <input type="text" name="firstname" id="firstname" class="form-control" formControlName="fIrstname" [(ngModel)]="firstname"  >
-           </div>
-
-           <div class="form-group mb-3">
-            <label for="lastname">Lastname :</label>
-            <input type="text" name="lastname" id="lastname" class="form-control" formControlName="lAstname"   [(ngModel)]="lastname" >
-        </div>
-       <div class="form-group mb-3">
-        <label for="phone">Phone :</label> 
-        <input type="text" name="phone" id="phone" formControlName="pHone" class="form-control" [(ngModel)]="phone">
-
-        </div>
-
+  errorMessage1:string ='';
+  errorMessage:string ='';
+  addUserForm: FormGroup;
  
-           <div class="form-group">
-            <button type="submit" class="btn btn-primary" [disabled]="addUserForm.invalid">Add User</button>
-            </div>
+  Cin:string 
+  firstname:string
+  lastname:string
+  phone:string
 
+  userList: AngularFireList<any>
+  constructor(private userService : UserService, public router:Router,
+    private db:AngularFireDatabase ,private fire:AngularFireAuth,private toastr: ToastrService) { 
+      this.userList = db.list('users')
+    }
 
+  ngOnInit(): void {
+    this.addUserForm=new FormGroup({
+      CIn: new FormControl('',[
+        Validators.required,
+      Validators.pattern("[0-9]+"),
+        Validators.minLength(3)
+      ]),
+      fIrstname: new FormControl('',[
+        Validators.required,
+        Validators.pattern("[A-Za-z ]+"),
+        Validators.minLength(3)
+      ]),
+      lAstname: new FormControl('',[
+        Validators.required,
+        Validators.pattern("[A-Za-z ]+"),
+        Validators.minLength(3)
+      ]),
+      pHone: new FormControl('',[
+        Validators.required,
+        Validators.pattern("[0-9]+"),
+        Validators.minLength(8),
+        Validators.maxLength(13)
+      ])
+    
+    });
+  }
+
+  onSubmit() {
+ 
+    let create = 'false';
+    
+            this.userList.push({
           
-       
-       </form>
-    </div>
-</div>
+            Cin: this.Cin ,
+            firstname: this.firstname ,
+            lastname: this.lastname ,
+            phone: this.phone,
+          
+              }).then(added =>{
+                this.router.navigate(['/people-list'])
+                this.toastr.success('User added successfully !' );
+              
+             
+        
+    }).catch(error=>{
+      console.error(error)
+      this.errorMessage1= error.messaage
+      console.log('error', error)
+      console.log(error.message)
+      this.toastr.error('Something went wrong !!! ' );
+    })
+    
+   /*
+    this.condactor = new Conductor(this.lastname,this.firstname,this.phone,this.address);
+   
+    console.log(this.condactor)
+    this.conductorservice.createConductor(this.condactor)
+    */
+  
+  }
