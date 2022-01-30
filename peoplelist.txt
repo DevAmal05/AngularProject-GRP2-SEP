@@ -1,50 +1,128 @@
+  displayUpdate: boolean = false;
+  userUpdate : User=new User();
+  id:any
+  errorMessage:string ='';
+  errorMessage1:string =''; 
+  Cin:string 
+  firstname:string
+  lastname:string
+  phone:string
+  userforupdate: AngularFireList<any>
+  data = {
+    Cin: '',
+    firstname : '' ,
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Users</h1>
-    <a routerLink="/add-user" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Add</a>
-</div>
+    lastname :  '' ,
+    phone :  ''  
+   } 
+    id1: any;
+
+userfordelete : AngularFireList<any>; 
+
+listuser = [];
+
+formGroup: FormGroup;
+displayAdd: boolean = false;
+
+addUserForm: FormGroup;
 
 
+userList: AngularFireList<any>
+
+  constructor(private router:Router, public dialog: MatDialog,
+    private firebase: AngularFireDatabase,  private userService: UserService,
+    private route: ActivatedRoute , 
+      private db:AngularFireDatabase ,private fire:AngularFireAuth) {
+      this.userList = db.list('users');
+
+      this.userfordelete = this.firebase.list('users');
+      this.route.params.subscribe( params => {
+        this.id = params
+      });
+      this.userforupdate = this.firebase.list('users');
+      this.id1 = this.route.snapshot.paramMap.get('id');
+      console.log(this.id1)
+    }
 
 
-
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">All  Users</h6>
-    </div>
-    <div class="card-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Cin</th>
-                    <th>Firstname</th>
-                    <th>Lastname</th>
-                    <th>Phone</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <tr *ngFor="let item1 of  listuser ">
-                    <td>{{ item1.Cin }}</td>
-                    <td>{{ item1.firstname }}</td>
-                    <td>{{ item1.lastname }}</td>
-                    <td>{{ item1.phone }}</td>
-                    <td>
-                            
+  ngOnInit(): void {
+    this.userService.getUsers().subscribe((results) => {
+      
+      this.listUser(results)
+   
+    })
+    
   
-                      
-                        <div class="example-button-container">
-                            <button style="margin-right: 12%" mat-mini-fab color="warn" (click)="openDialog(item1.$key)">
-                              <mat-icon>delete</mat-icon></button>
-                              <button mat-mini-fab color="green" (click)="edit(item1.$key)" >
-                                <mat-icon>edit</mat-icon>
-                            </button>
-                           
-                          </div>
-                           </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+  }
+
+  listUser(entries){
+    this.listuser = [];
+    entries.forEach(element => {
+     let y = element.payload.toJSON()
+     y["$key"] = element.key
+     this.listuser.push(y as User);
+  })
+  console.log(this.listuser);
+  }
+
+
+  onSubmit() {
+ 
+    let create = 'false';
+    
+            this.userList.push({
+          
+            Cin: this.Cin ,
+            firstname: this.firstname ,
+            lastname: this.lastname ,
+            phone: this.phone,
+          
+              }).then(added =>{
+                this.router.navigate(['/people-list'])
+              
+             
+        
+    }).catch(error=>{
+      console.error(error)
+      this.errorMessage1= error.messaage
+      console.log('error', error)
+      console.log(error.message)
+    })
+    
+   /*
+    this.condactor = new Conductor(this.lastname,this.firstname,this.phone,this.address);
+   
+    console.log(this.condactor)
+    this.conductorservice.createConductor(this.condactor)
+    */
+  
+  }
+
+ 
+
+  openDialog(key): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '350px',
+      data: "voulez-vous vraiment supprimer ces données?"
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+      
+        this.userfordelete.remove(key);
+      
+     
+      }
+    });   
+  } 
+  
+
+
+
+
+
+  
+  edit(key){
+    
+    this.router.navigate(['update-user/'+key])
+  
+  }
